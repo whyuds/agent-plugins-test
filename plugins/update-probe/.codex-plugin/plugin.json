@@ -1,7 +1,7 @@
 {
   "name": "update-probe",
-  "version": "0.1.0",
-  "description": "Offline plugin update test: 0.1.0 / BLUE / Skill + MCP.",
+  "version": "0.2.0",
+  "description": "Offline update test: 0.2.0 / TEAL / Skill + MCP UI.",
   "author": {
     "name": "whyuds"
   },
@@ -9,13 +9,13 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "Update Probe 0.1.0 BLUE",
-    "shortDescription": "Offline plugin update test: 0.1.0 / BLUE / Skill + MCP.",
-    "longDescription": "Read-only, offline Skill and MCP probe for installation and update testing.",
+    "displayName": "Update Probe 0.2.0 TEAL",
+    "shortDescription": "Offline update test: 0.2.0 / TEAL / Skill + MCP UI.",
+    "longDescription": "Offline Skill, MCP tools and interactive MCP App for installation and update testing.",
     "developerName": "whyuds",
     "category": "Productivity",
     "capabilities": [],
-    "brandColor": "#2563EB",
+    "brandColor": "#0D9488",
     "defaultPrompt": [
       "Use update-probe-check to verify this installed plugin."
     ]

@@ -18,7 +18,7 @@ def render() -> dict[Path, str]:
     if not re.fullmatch(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:\+[A-Za-z0-9.-]+)?", version):
         raise ValueError("Use a stable SemVer version, optionally with build metadata")
     title = f"Update Probe {version} {release['marker']}"
-    description = f"Offline plugin update test: {version} / {release['marker']} / Skill + MCP."
+    description = f"Offline update test: {version} / {release['marker']} / Skill + MCP UI."
     base = {
         "name": "update-probe", "version": version,
         "description": description, "author": {"name": "whyuds"},
@@ -29,9 +29,9 @@ def render() -> dict[Path, str]:
         **base, "skills": "./skills/", "mcpServers": "./.mcp.json",
         "interface": {
             "displayName": title, "shortDescription": description,
-            "longDescription": "Read-only, offline Skill and MCP probe for installation and update testing.",
+            "longDescription": "Offline Skill, MCP tools and interactive MCP App for installation and update testing.",
             "developerName": "whyuds", "category": "Productivity", "capabilities": [],
-            "brandColor": "#2563EB",
+            "brandColor": "#0D9488",
             "defaultPrompt": ["Use update-probe-check to verify this installed plugin."],
         },
     }

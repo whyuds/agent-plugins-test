@@ -1,0 +1,15 @@
+{
+  "name": "agent-plugins-test-build",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build_ui.mjs",
+    "check:ui": "node scripts/build_ui.mjs --check",
+    "test:ui": "node tests/ui_smoke.mjs"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/ext-apps": "2.0.0",
+    "esbuild": "0.28.2",
+    "playwright": "1.63.0"
+  }
+}

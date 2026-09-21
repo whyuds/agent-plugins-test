@@ -14,7 +14,7 @@ PROTOCOLS = ("2024-11-05", "2025-03-26", "2025-06-18")
 PACKAGE_FILES = (
     "release.json", "plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json",
     "mcp.json", ".mcp.json", "mcp.cursor.json", "scripts/server.py",
-    "skills/update-probe-check/SKILL.md",
+    "skills/update-probe-check/SKILL.md", "web/app.html", "web/THIRD-PARTY-NOTICES.txt",
 )
 
 
@@ -40,6 +40,10 @@ class Probe:
     def __init__(self, root: Path = ROOT):
         self.root = root
         self.release = json.loads((root / "release.json").read_text(encoding="utf-8"))
+        # Freeze the UI with the process: disk updates must not impersonate a live upgrade.
+        self.ui_html = (root / "web/app.html").read_bytes()
+        self.ui_sha256 = hashlib.sha256(self.ui_html).hexdigest()
+        self.ui_uri = f"ui://update-probe/{self.release['build_id']}-{self.ui_sha256[:12]}.html"
         self.package_sha256 = fingerprint(root)
         self.instance_id = str(uuid.uuid4())
         self.started_at = utc_now()
@@ -54,7 +58,14 @@ class Probe:
         annotations = {"readOnlyHint": True, "destructiveHint": False,
                        "idempotentHint": True, "openWorldHint": False}
         label = f"{self.release['version']} {self.release['marker']}"
-        return [
+        output = {"type": "object", "properties": {
+            "version": {"type": "string"}, "marker": {"type": "string"},
+            "nonce": {"type": "string"}, "ui_marker": {"type": "string"},
+            "ui_resource_uri": {"type": "string"}, "ui_sha256": {"type": "string"},
+            "disk_matches_startup": {"type": "boolean"}},
+            "required": ["version", "marker", "nonce", "ui_marker", "ui_resource_uri", "ui_sha256", "disk_matches_startup"],
+            "additionalProperties": True}
+        items = [
             {"name": "probe_release", "description": f"Read live Update Probe version and package hashes ({label}). Offline; no account access.",
              "inputSchema": {"type": "object", "properties": {"nonce": nonce},
                              "required": ["nonce"], "additionalProperties": False}, "annotations": annotations},
@@ -64,6 +75,28 @@ class Probe:
                  "b": {"type": "integer", "minimum": -1000000, "maximum": 1000000}},
                  "required": ["nonce", "a", "b"], "additionalProperties": False}, "annotations": annotations},
         ]
+        items.append({"name": "probe_ui", "description": f"Open the interactive Update Probe MCP App ({label}): UI/server version comparison and real MCP sum buttons. No login or network needed.",
+                      "inputSchema": items[0]["inputSchema"], "annotations": annotations,
+                      "_meta": {"ui": {"resourceUri": self.ui_uri, "visibility": ["model", "app"]},
+                                "openai/outputTemplate": self.ui_uri}})
+        for item in items:
+            if self.protocol == "2025-06-18":
+                item["outputSchema"] = output if item["name"] != "probe_sum" else {
+                    **output, "properties": {**output["properties"], "a": {"type": "integer"},
+                                             "b": {"type": "integer"}, "sum": {"type": "integer"}},
+                    "required": [*output["required"], "a", "b", "sum"]}
+        return items
+
+    def read_resource(self, params: dict) -> dict:
+        # MCP clients may attach standard request metadata (e.g. progress tokens).
+        # Only the exact advertised URI can select content; no filesystem paths are accepted.
+        if params.get("uri") != self.ui_uri:
+            raise RpcError(-32602, "Unknown UI resource; read the exact URI advertised by probe_ui")
+        return {"contents": [{"uri": self.ui_uri, "mimeType": "text/html;profile=mcp-app",
+                              "text": self.ui_html.decode("utf-8"), "_meta": {
+                                  "ui": {"prefersBorder": True, "csp": {"connectDomains": [], "resourceDomains": []}},
+                                  "openai/widgetPrefersBorder": True,
+                                  "openai/widgetCSP": {"connect_domains": [], "resource_domains": []}}}]}
 
     def evidence(self, nonce: str) -> dict:
         try:
@@ -82,14 +115,15 @@ class Probe:
             "loader_route": os.environ.get("UPDATE_PROBE_LOADER", "direct-not-host-installed"),
             "client_info": self.client_info, "protocol_version": self.protocol,
             "installed_root": str(self.root),
+            "ui_resource_uri": self.ui_uri, "ui_sha256": self.ui_sha256,
         }
 
     def call_tool(self, params: dict) -> dict:
         name = params.get("name")
-        if name not in ("probe_release", "probe_sum"):
+        if name not in ("probe_release", "probe_sum", "probe_ui"):
             raise RpcError(-32602, "Unknown tool")
         args = params.get("arguments", {})
-        expected = {"nonce"} if name == "probe_release" else {"nonce", "a", "b"}
+        expected = {"nonce", "a", "b"} if name == "probe_sum" else {"nonce"}
         if not isinstance(args, dict) or set(args) != expected:
             raise RpcError(-32602, "Arguments must match the tool input schema")
         if not isinstance(args["nonce"], str) or not 1 <= len(args["nonce"]) <= 120:
@@ -128,7 +162,8 @@ class Probe:
                     raise RpcError(-32602, "initialize requires protocolVersion, clientInfo, and capabilities")
                 self.protocol = requested if requested in PROTOCOLS else PROTOCOLS[-1]
                 self.client_info = {k: params["clientInfo"][k] for k in ("name", "version") if isinstance(params["clientInfo"].get(k), str)}
-                result = {"protocolVersion": self.protocol, "capabilities": {"tools": {"listChanged": False}},
+                result = {"protocolVersion": self.protocol, "capabilities": {
+                              "tools": {"listChanged": False}, "resources": {"subscribe": False, "listChanged": False}},
                           "serverInfo": {"name": "update-probe", "version": self.release["version"]}}
             elif not self.ready:
                 raise RpcError(-32002, "Initialize the MCP session first")
@@ -138,6 +173,15 @@ class Probe:
                 result = {"tools": self.tools()}
             elif method == "tools/call":
                 result = self.call_tool(params)
+            elif method == "resources/list":
+                if params.get("cursor"):
+                    raise RpcError(-32602, "This probe has one resource-list page")
+                result = {"resources": [{"uri": self.ui_uri, "name": "Update Probe UI",
+                                         "mimeType": "text/html;profile=mcp-app"}]}
+            elif method == "resources/templates/list":
+                result = {"resourceTemplates": []}
+            elif method == "resources/read":
+                result = self.read_resource(params)
             else:
                 raise RpcError(-32601, "Method not found")
             return {"jsonrpc": "2.0", "id": request_id, "result": result}

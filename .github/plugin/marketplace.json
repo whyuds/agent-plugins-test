@@ -10,8 +10,8 @@
     {
       "name": "update-probe",
       "source": "./plugins/update-probe",
-      "description": "Offline plugin update test: 0.1.0 / BLUE / Skill + MCP.",
-      "version": "0.1.0"
+      "description": "Offline update test: 0.2.0 / TEAL / Skill + MCP UI.",
+      "version": "0.2.0"
     }
   ]
 }

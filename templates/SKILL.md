@@ -16,6 +16,14 @@ For an installation/update check:
 5. Report the skill marker, live `version`, `build_id`, `marker`, `loader_route`,
    `instance_id`, `started_at`, `package_sha256`, `disk_matches_startup`,
    echoed nonce, and sum. The sum must be 12. Preserve mismatches as observations.
+6. Call `probe_ui` with the same nonce to open the native MCP App. Ask the user
+   to click **刷新服务版本** and **通过 MCP 计算**, then compare the card's own
+   UI marker (**{ui_marker}**) with the returned service marker. The agent cannot
+   infer that the host rendered the card or buttons worked merely from a successful tool result.
+
+If the host does not render MCP Apps, record UI as `unsupported` (if documented)
+or `unable` (if unknown), separately from working Skill/MCP tools. A browser
+preview or a code-generated imitation is not a passing native client UI test.
 
 If either tool is unavailable or fails, report exactly that. Do not run the
 server from a terminal, install another copy, fetch repository contents, or

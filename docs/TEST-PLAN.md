@@ -3,12 +3,13 @@
 ## 目标与边界
 
 测试一个离线插件 `update-probe` 在 Codex Desktop、Cursor IDE、VS Code 的
-GitHub Copilot Agent Plugins 中的安装、Skill/MCP 可用性和远端更新。
+GitHub Copilot Agent Plugins 中的安装、Skill/MCP/MCP Apps UI 可用性和远端更新。
 **VS Code 的 Copilot 插件页不是 Codex IDE 扩展；不要混用结果。**
 
 只测试这个演示插件，不修改或卸载现有业务插件，不接入公司 API、SSO、MCP Tunnel。
 需要客户端能运行 `python`（Python 3.10+）；无 pip/npm 依赖。模型调用仍可能产生客户端费用。
-首版为 `0.1.0 / BLUE / probe-010-blue-20260921`。本次只发布首版，收到首版记录后才发布下一轮。
+当前 UI 基线为 `0.2.0 / TEAL / probe-020-teal-ui-20260921`。历史无 UI 的 `v0.1.0` 保留不变。
+本次是补充 UI 的新基线，后续更新实验等本基线记录完成后才发布，不把增加 UI 与常规升级混为同一次实验。
 
 ## 1. 首版结构与实验解释
 
@@ -18,6 +19,7 @@ GitHub Copilot Agent Plugins 中的安装、Skill/MCP 可用性和远端更新�
 | Codex 兼容 | `.agents/plugins/marketplace.json`、插件内 `.codex-plugin/plugin.json` 和 `.mcp.json` | 市场发现和现有 Codex 加载路径 |
 | VS Code 市场 | `.github/plugin/marketplace.json` | 指向同一份通用插件包 |
 | Cursor 兼容 | `.cursor-plugin/marketplace.json`、插件内 `.cursor-plugin/plugin.json` 和 `mcp.cursor.json` | 市场发现与 Cursor 路径变量 |
+| MCP Apps UI | `web/app.html`，`probe_ui` 的 `_meta.ui.resourceUri`，`resources/read` | 自包含卡片、按钮调用和独立 UI 版本证据 |
 
 只有一个插件、一份 Skill、一份 MCP 实现。兼容描述由 `scripts/sync_manifests.py` 生成。
 没有 Claude 回退市场，避免第一轮无法判断哪个入口生效。
@@ -29,7 +31,7 @@ GitHub Copilot Agent Plugins 中的安装、Skill/MCP 可用性和远端更新�
 
 - GitHub：`https://github.com/whyuds/agent-plugins-test.git`
 - GitLab：`ssh://git@gitlab.qiyi.domain:10022/wangyudong/agent-plugins-test.git`
-- 两端跟踪分支均为 `master`，首版标签 `v0.1.0`。测试更新时跟踪 **master 分支**，不能固定标签或 commit。
+- 两端跟踪分支均为 `master`，当前基线标签 `v0.2.0`。测试更新时跟踪 **master 分支**，不能固定标签或 commit。
 - 两仓库首版内容相同、插件名和市场名相同。**同一客户端一次只启用一个来源。**
 - 推荐先完成 GitHub 三端安装及升级，再测试 GitLab；切换前在客户端卸载演示插件并移除演示市场，记录截图。
 - 不清理全局缓存、不卸载业务插件。卸载或重新安装属于最后的恢复手段，不算正常更新通过。
@@ -95,15 +97,31 @@ GitLab 用提供的 SSH URL另行测试。记录 URL 是否被接受；客户端
 请使用已安装插件 update-probe 的 update-probe-check 技能做安装验收。
 本次 nonce：github-codex-install-20260921-01。
 读取已安装的 Skill 并报告它声明的 marker；实际调用插件的 probe_release，
-再调用 probe_sum 计算 7+5，两次使用相同 nonce。
+再调用 probe_sum 计算 7+5，最后调用 probe_ui 打开交互卡片，都使用相同 nonce。
 列出实际 skill marker、MCP version/build_id/marker、loader_route、instance_id、
 started_at、package_sha256、disk_matches_startup、回显 nonce 和运算结果。
 如果技能或工具不可用，原样报告，不要下载仓库、手动运行脚本、安装其他副本或用心算替代工具。
+卡片是否显示、按钮是否工作，由我操作后反馈；不要仅根据 probe_ui 返回成功就判 UI 通过。
 ```
 
-首版核对：Skill=`SKILL-010-BLUE`，MCP=`0.1.0 / BLUE / probe-010-blue-20260921`，
-nonce与本次一致，sum=12，两个工具可见并真实调用，`disk_matches_startup=true`。
+基线核对：Skill=`SKILL-020-TEAL`，MCP=`0.2.0 / TEAL / probe-020-teal-ui-20260921`，
+nonce与本次一致，sum=12，三个工具可见并真实调用，`disk_matches_startup=true`。
 不要只凭助手说“成功”或插件详情中的版本判通过。保留真实工具调用展开内容。
+
+### 卡片手动验收（每个客户端独立记录）
+
+1. 确认是对话内原生 MCP 卡片，不是另开网页、静态截图或 Agent 自己画的 HTML。
+2. 左侧卡片自身应为 `0.2.0 / UI-020-TEAL`，右侧为真实 MCP 回执版本。
+3. nonce 改为本次独一无二的值，点击 **刷新服务版本**，展开“回执与缓存诊断”确认回显值。
+4. 点击 **通过 MCP 计算**，默认应返回 `7 + 5 = 12`；再把 A 改为 -9、B 改为 2，应返回 -7。
+5. A 输入 1.5 应显示参数错误，不应发出 MCP 调用；刷新仍可继续使用。
+6. 保存卡片截图和 `ui_resource_uri/ui_sha256`。无 UI 时记录错误、宿主版本及 resources/read 日志。
+   已证实宿主不支持记 `unsupported`；能力未知记 `unable`；支持但加载失败记 `fail`。
+   **MCP 工具正常而 UI 不正常，是不同结论。** 不用生产 tunnel 或公网服务绕过本轮本地插件测试。
+
+UI 按标准 MCP Apps 的 postMessage 桥接工作；使用官方 SDK，并附 OpenAI 模板元数据兼容字段。
+CSP 不允许外连，HTML 内置 JS/CSS。普通 `probe_release/probe_sum` 不绑定卡片，避免每次按钮调用又新增空卡片。
+它不是 ChatGPT 网页连接器的部署样例，未配置公网应用域；本任务先测上述三个本地客户端。
 
 ## 5. 更新实验：等首版确认后分轮推送
 
@@ -111,10 +129,10 @@ nonce与本次一致，sum=12，两个工具可见并真实调用，`disk_matche
 
 | 轮次 | 唯一重点变化 | 观察问题 |
 |---|---|---|
-| U1（下一步） | `0.1.0 → 0.1.1`，BLUE→GREEN；Skill 与 MCP 标记同步变，工具名/schema不变 | 常规版本升级能否发现、提示、更新并生效 |
+| U1（下一步） | `0.2.0 → 0.2.1`，TEAL→AMBER；Skill、MCP、UI 标记同步变，工具名/schema不变 | 常规升级能否提示，三层能否同步生效 |
 | U2（可选独立实验） | 保持已安装数字版本，改变 build_id/marker/内容；先不改构建后缀 | 实际按提交、内容、SemVer还是版本字符串识别；无更新也可能符合宿主策略 |
 | U3（可选） | 数字版本不变，仅增加/改变 SemVer `+build` 后缀 | 构建后缀是否作为缓存键；不能预设 SemVer 优先级会变 |
-| U4（可选） | 升到 `0.2.0`，增加新工具/参数和新技能 | MCP schema 与 Skill 列表缓存能否刷新 |
+| U4（可选） | 升到 `0.3.0`，增加新工具/参数和新技能 | MCP schema 与 Skill 列表缓存能否刷新 |
 
 GitHub 升级时先不推 GitLab，保留 GitLab 首版做独立来源轮次。用户完成 GitLab 首版后再同步升级。
 U2/U3不是推荐发布方式，而是诊断缓存策略的隔离实验。每次只运行一轮；得到确认才执行下一次发布。
@@ -132,6 +150,8 @@ U2/U3不是推荐发布方式，而是诊断缓存策略的隔离实验。每次
    市场已更新不代表插件已更新；无按钮但插件已静默更新也应单独记录。
 5. **旧对话**：用新 nonce 重测，记录它仍旧版本还是热更新；旧会话不变不直接判失败。
 6. **新对话**：不重启应用，重测。比较 Skill marker、MCP版本、进程instance、包哈希和工具schema。
+   重新调用 `probe_ui` 创建新卡片，比较 UI 标记/资源 URI/哈希；旧消息中的历史卡片未更新不单独算失败。
+   如果历史卡片按钮返回新服务版本，应显示版本不一致，保留截图，不应隐藏差异。
 7. **重启后新对话**：前步未生效才执行 Reload Window/完整重启，重测，记录最小生效动作。
 8. **最后恢复**：只有前面都失败才卸载重装本演示插件。记录“重装可用，正常更新未通过”，不能覆盖前面的失败。
 
@@ -149,9 +169,10 @@ U2/U3不是推荐发布方式，而是诊断缓存策略的隔离实验。每次
 ## 7. 记录与结论
 
 复制 `docs/results-template.csv` 到本机 `results/`（已被 git 忽略）。截图/回执也放这里，不自动上传。
-发现、安装、Skill、MCP、提示、更新、生效动作分别记录，不合成一个模糊“成功”。
+发现、安装、Skill、MCP、UI渲染、UI按钮、提示、更新、生效动作分别记录，不合成一个模糊“成功”。
+UI 详细记录可另用 `docs/ui-results-template.csv`，通过 nonce 关联主记录。
 
-状态可用：`pass`、`fail`、`blocked`、`unsupported`、`not_observed`、`pending`。
+状态可用：`pass`、`fail`、`blocked`、`unsupported`、`unable`、`not_observed`、`pending`。
 提示单独记录：`badge/dialog/silent/none_in_window/not_tested`。
 区分根因：网络/认证、套餐/组织策略、市场发现、插件格式、Python环境、MCP启动、更新检测、旧会话缓存。
 
@@ -164,8 +185,12 @@ U2/U3不是推荐发布方式，而是诊断缓存策略的隔离实验。每次
 
 ```powershell
 python scripts/sync_manifests.py
+npm ci
+npm run build
+npm run check:ui
 python scripts/sync_manifests.py --check
 python -m unittest discover -s tests -v
+npm run test:ui
 git diff --check
 ```
 
@@ -179,3 +204,5 @@ git diff --check
 - [Cursor 插件、团队市场和更新](https://cursor.com/docs/plugins)
 - [Cursor 格式与路径变量](https://cursor.com/docs/reference/plugins)
 - [VS Code 插件安装及更新](https://code.visualstudio.com/docs/agent-customization/agent-plugins)
+- [标准 MCP Apps](https://modelcontextprotocol.io/extensions/apps/overview)
+- [OpenAI MCP UI 与缓存资源 URI](https://developers.openai.com/plugins/build/chatgpt-ui)

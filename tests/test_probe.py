@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import os
 import shutil
@@ -43,7 +44,7 @@ class ProbeTests(unittest.TestCase):
         reply = initialize(p)
         self.assertEqual(reply["result"]["serverInfo"]["version"], p.release["version"])
         tools = p.handle(request("tools/list"))["result"]["tools"]
-        self.assertEqual([t["name"] for t in tools], ["probe_release", "probe_sum"])
+        self.assertEqual([t["name"] for t in tools], ["probe_release", "probe_sum", "probe_ui"])
         for tool in tools:
             self.assertTrue(tool["annotations"]["readOnlyHint"])
             self.assertFalse(tool["annotations"]["openWorldHint"])
@@ -56,6 +57,40 @@ class ProbeTests(unittest.TestCase):
         self.assertTrue(value["disk_matches_startup"])
         self.assertEqual(value["call_count"], 1)
         self.assertEqual(value["client_info"], {"name": "probe-tests", "version": "1"})
+
+    def test_ui_resource_and_output_contract(self):
+        tools = self.probe.tools()
+        self.assertNotIn("_meta", tools[0])
+        self.assertNotIn("_meta", tools[1])
+        uri = tools[2]["_meta"]["ui"]["resourceUri"]
+        self.assertEqual(self.probe.handle(request("resources/list"))["result"]["resources"][0]["uri"], uri)
+        resource = self.probe.handle(request("resources/read", {"uri": uri}))["result"]["contents"][0]
+        self.assertEqual(resource["mimeType"], "text/html;profile=mcp-app")
+        self.assertEqual(resource["_meta"]["ui"]["csp"], {"connectDomains": [], "resourceDomains": []})
+        self.assertEqual(hashlib.sha256(resource["text"].encode()).hexdigest(), self.probe.ui_sha256)
+        self.assertEqual(self.probe.handle(request("resources/read", {"uri": uri, "_meta": {"progressToken": 1}}))["result"]["contents"][0], resource)
+        result = self.probe.handle(request("tools/call", {"name": "probe_ui", "arguments": {"nonce": "ui-open"}}))["result"]
+        self.assertEqual(result["structuredContent"]["ui_resource_uri"], uri)
+        self.assertEqual(json.loads(result["content"][0]["text"]), result["structuredContent"])
+        self.assertIn("nonce", tools[2]["outputSchema"]["required"])
+
+    def test_resource_rejects_other_paths(self):
+        for uri in ("file:///etc/passwd", "../release.json", "ui://update-probe/old.html", None, {}):
+            self.assertEqual(self.probe.handle(request("resources/read", {"uri": uri}))["error"]["code"], -32602)
+        self.assertEqual(self.probe.call_count, 0)
+
+    def test_ui_stays_frozen_on_disk_update(self):
+        temp_root = ROOT / "tmp"
+        temp_root.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temp_root) as temp:
+            copy = Path(temp) / "plugin"
+            shutil.copytree(PLUGIN, copy, ignore=shutil.ignore_patterns("__pycache__"))
+            p = server.Probe(copy)
+            original = p.read_resource({"uri": p.ui_uri})
+            (copy / "web/app.html").write_text("<p>Different UI</p>", encoding="utf-8")
+            self.assertEqual(p.read_resource({"uri": p.ui_uri}), original)
+            self.assertFalse(p.evidence("changed-ui")["disk_matches_startup"])
+            self.assertNotEqual(server.Probe(copy).ui_uri, p.ui_uri)
 
     def test_instance_id_is_process_instance_not_release(self):
         self.assertNotEqual(self.probe.instance_id, server.Probe().instance_id)

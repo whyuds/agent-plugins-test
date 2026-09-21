@@ -1,0 +1,7 @@
+client,client_version,source,phase,nonce,ui_render,ui_marker,server_version,ui_resource_uri,ui_sha256,refresh_button,sum_positive,sum_negative,invalid_input_zero_calls,old_card_behavior,new_card_behavior,screenshot,notes
+Codex,,GitHub,baseline,,pending,,,,,pending,pending,pending,pending,,,,
+Cursor,,GitHub,baseline,,pending,,,,,pending,pending,pending,pending,,,,
+VSCode-Copilot,,GitHub,baseline,,pending,,,,,pending,pending,pending,pending,,,,
+Codex,,GitLab,baseline,,pending,,,,,pending,pending,pending,pending,,,,
+Cursor,,GitLab,baseline,,pending,,,,,pending,pending,pending,pending,,,,
+VSCode-Copilot,,GitLab,baseline,,pending,,,,,pending,pending,pending,pending,,,,
