@@ -11,6 +11,14 @@ GitHub Copilot Agent Plugins 中的安装、Skill/MCP/MCP Apps UI 可用性和�
 当前 UI 基线为 `0.2.0 / TEAL / probe-020-teal-ui-20260921`。历史无 UI 的 `v0.1.0` 保留不变。
 本次是补充 UI 的新基线，后续更新实验等本基线记录完成后才发布，不把增加 UI 与常规升级混为同一次实验。
 
+### 2026-09-21：U1 已由用户授权启动
+
+- GitHub 发布 `0.2.1 / AMBER / probe-021-amber-ui-20260921`，`main` 与 `master` 同步，GitLab 不升级。
+- 预期 Skill=`SKILL-021-AMBER`、UI=`UI-021-AMBER`，卡片为琥珀色；工具名、参数和计算逻辑不变。
+- Cursor 3.21.16 的 0.2.0 安装、Skill/MCP 与原生 UI 显示已有用户截图证据；卡片在折叠工具调用区域内。
+- 本轮先观察提示，不自动刷新客户端、不重启、不重装。卡片按钮交互仍需用户实测，不能从显示成功推断。
+- 下文 0.2.0 数值保留为升级前基线，升级后按上述 0.2.1 标记核对。
+
 ## 1. 首版结构与实验解释
 
 | 层 | 首版文件 | 目的 |
@@ -31,7 +39,8 @@ GitHub Copilot Agent Plugins 中的安装、Skill/MCP/MCP Apps UI 可用性和�
 
 - GitHub：`https://github.com/whyuds/agent-plugins-test.git`
 - GitLab：`ssh://git@gitlab.qiyi.domain:10022/wangyudong/agent-plugins-test.git`
-- 两端跟踪分支均为 `master`，当前基线标签 `v0.2.0`。测试更新时跟踪 **master 分支**，不能固定标签或 commit。
+- GitHub 的 `main` 与 `master` 同步（此次 Cursor 使用 `main`）；GitLab 跟踪 `master`。
+  测试更新时跟踪分支，不能固定标签或 commit；历史基线标签为 `v0.2.0`。
 - 两仓库首版内容相同、插件名和市场名相同。**同一客户端一次只启用一个来源。**
 - 推荐先完成 GitHub 三端安装及升级，再测试 GitLab；切换前在客户端卸载演示插件并移除演示市场，记录截图。
 - 不清理全局缓存、不卸载业务插件。卸载或重新安装属于最后的恢复手段，不算正常更新通过。

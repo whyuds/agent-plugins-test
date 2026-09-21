@@ -31,7 +31,7 @@ def render() -> dict[Path, str]:
             "displayName": title, "shortDescription": description,
             "longDescription": "Offline Skill, MCP tools and interactive MCP App for installation and update testing.",
             "developerName": "whyuds", "category": "Productivity", "capabilities": [],
-            "brandColor": "#0D9488",
+            "brandColor": "#A45B08",
             "defaultPrompt": ["Use update-probe-check to verify this installed plugin."],
         },
     }

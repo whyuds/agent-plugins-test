@@ -1,0 +1,26 @@
+{
+  "version": "0.2.1",
+  "experiment": "U1 ordinary version update, GitHub only",
+  "previous_version": "0.2.0",
+  "marker": "AMBER",
+  "build_id": "probe-021-amber-ui-20260921",
+  "skill_marker": "SKILL-021-AMBER",
+  "ui_marker": "UI-021-AMBER",
+  "tool_schema_revision": 2,
+  "package_sha256": "1f40cd3fef960824f017d157843de32f582391882dc5a2d3cdd21dc443d26207",
+  "ui_resource_uri": "ui://update-probe/probe-021-amber-ui-20260921-a94dc4029298.html",
+  "ui_sha256": "a94dc4029298e659bd2bcbe2d9c58aa540ed5e716f90dc74da2489529970ac5a",
+  "github_branches": ["main", "master"],
+  "tag": "v0.2.1",
+  "gitlab": "not updated; retained at 0.2.0",
+  "verified_at": "2026-09-21T06:06:49Z",
+  "automated_checks": {
+    "unit_tests_passed": 16,
+    "generated_manifests_and_ui": "pass",
+    "browser_protocol_host": "pass; not a native client verdict",
+    "real_ui_button_calls": 3,
+    "tool_names_input_output_schemas": "unchanged from 0.2.0"
+  },
+  "cursor_update_prompt": "pending user observation",
+  "cursor_client_modified_by_publisher": false
+}

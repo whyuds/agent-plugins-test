@@ -1,8 +1,8 @@
 {
-  "version": "0.2.0",
-  "marker": "TEAL",
-  "build_id": "probe-020-teal-ui-20260921",
-  "skill_marker": "SKILL-020-TEAL",
-  "ui_marker": "UI-020-TEAL",
+  "version": "0.2.1",
+  "marker": "AMBER",
+  "build_id": "probe-021-amber-ui-20260921",
+  "skill_marker": "SKILL-021-AMBER",
+  "ui_marker": "UI-021-AMBER",
   "tool_schema_revision": 2
 }

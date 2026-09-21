@@ -5,7 +5,7 @@ description: Verify the installed Update Probe demo plugin, its skill marker, an
 
 # Update Probe check
 
-This skill copy identifies itself as **SKILL-020-TEAL** (version **0.2.0**).
+This skill copy identifies itself as **SKILL-021-AMBER** (version **0.2.1**).
 
 For an installation/update check:
 
@@ -18,7 +18,7 @@ For an installation/update check:
    echoed nonce, and sum. The sum must be 12. Preserve mismatches as observations.
 6. Call `probe_ui` with the same nonce to open the native MCP App. Ask the user
    to click **刷新服务版本** and **通过 MCP 计算**, then compare the card's own
-   UI marker (**UI-020-TEAL**) with the returned service marker. The agent cannot
+   UI marker (**UI-021-AMBER**) with the returned service marker. The agent cannot
    infer that the host rendered the card or buttons worked merely from a successful tool result.
 
 If the host does not render MCP Apps, record UI as `unsupported` (if documented)
