@@ -1,0 +1,30 @@
+{
+  "version": "0.1.0",
+  "build_id": "probe-010-blue-20260921",
+  "marker": "BLUE",
+  "skill_marker": "SKILL-010-BLUE",
+  "package_sha256": "28d139de8b437dbfd461cf837bcc5d7664b8ccc7c917e94d74a25df6331e79d5",
+  "branch": "master",
+  "tag": "v0.1.0",
+  "verified_at": "2026-09-21T03:23:49Z",
+  "automated_checks": {
+    "python": "3.11.9",
+    "unit_tests": {"passed": 13, "failed": 0},
+    "generated_files": "pass",
+    "codex_manifest_validator": "pass",
+    "skill_validator": "pass",
+    "agent_plugins_1_0_official_json_schemas": "pass",
+    "stdio_roundtrip_all_three_configs": "pass_with_test_host_path_resolution",
+    "mcp_python_sdk": {"version": "2.2.0", "result": "pass", "negotiated_protocol": "2025-06-18"}
+  },
+  "manual_checks": {
+    "codex_github": "pending",
+    "codex_gitlab": "pending",
+    "cursor_github": "pending",
+    "cursor_gitlab": "pending",
+    "vscode_copilot_github": "pending",
+    "vscode_copilot_gitlab": "pending",
+    "update_notifications": "pending_next_release",
+    "pure_portable_format": "not_tested"
+  }
+}

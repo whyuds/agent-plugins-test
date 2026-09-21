@@ -1,0 +1,20 @@
+{
+  "name": "agent-plugins-test",
+  "interface": {
+    "displayName": "Agent Plugins Test"
+  },
+  "plugins": [
+    {
+      "name": "update-probe",
+      "source": {
+        "source": "local",
+        "path": "./plugins/update-probe"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

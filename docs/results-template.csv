@@ -1,0 +1,7 @@
+client,client_version,os,plan_or_team,source,branch,install_route,scope,phase,observed_at,nonce,discovery,installation,skill_status,skill_marker,mcp_status,mcp_version,build_id,marker,loader_route,instance_id,package_sha256,disk_matches_startup,sum,notification,auto_update_setting,manual_action,effective_after,evidence_path,notes
+Codex,,,,GitHub,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,
+Cursor,,,,GitHub,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,
+VSCode-Copilot,,,,GitHub,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,
+Codex,,,,GitLab,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,
+Cursor,,,,GitLab,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,
+VSCode-Copilot,,,,GitLab,master,,,install,,,pending,pending,pending,,pending,,,,,,,,,not_tested,,,,,

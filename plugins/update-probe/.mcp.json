@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "update-probe": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "-u",
+        "./scripts/server.py"
+      ],
+      "env": {
+        "UPDATE_PROBE_LOADER": "codex-relative-cwd",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "cwd": "./"
+    }
+  }
+}

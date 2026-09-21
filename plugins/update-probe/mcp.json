@@ -1,0 +1,17 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "update-probe": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "-u",
+        "./scripts/server.py"
+      ],
+      "env": {
+        "UPDATE_PROBE_LOADER": "portable-default-cwd",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    }
+  }
+}
